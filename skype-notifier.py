@@ -41,7 +41,7 @@ class Indicators:
             count = indicator.get_property('count')
             if count:
                 count += 1
-            else
+            else:
                 count = 2
             indicator.set_property_int('count', count)
         
@@ -65,7 +65,7 @@ class Indicators:
                 indicator = self._indicators[label]
                 indicator.messages.remove(msg_id)
                 count = indicator.get_property('count')
-                if count && count > 1:
+                if count and count > 1:
                     indicator.set_property_int('count', count - 1)
                 else:
                     indicator.hide()
@@ -104,12 +104,13 @@ class SkypeHandler:
             else:
                 label = msg.FromHandle
                 handle = msg.FromHandle
-            self.indicators.add_indicator(label, handle, ,msg.Timestamp, msg.Id)
+                self.indicators.add_indicator(label, handle, msg.Timestamp, msg.Id)
         elif status == "READ":
             self.indicators.remove_indicator(label, msg.Id)
         
 
 
 if __name__ == '__main__':
-    SkypeHandler()
+    indicators = Indicators()
+    SkypeHandler(indicators)
     gtk.main()

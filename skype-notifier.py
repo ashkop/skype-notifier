@@ -27,6 +27,7 @@ class Indicators:
         
         self.server = indicate.indicate_server_ref_default()
         self.server.set_type("message.im")
+        # TODO: path to desktop file shouldn't be hardcoded
         self.server.set_desktop_file("/usr/share/applications/skype.desktop")
         self.server.connect("server-display", skype.focus)
         self.server.show()
@@ -90,12 +91,18 @@ class SkypeHandler:
     def __init__(self):
 
         self.client = self.get_client()
-        self.client.Attach()
+        
+        # This block attends to solve problem of attaching to Skype client
+        # First Attach call queries for attachment status but when Skype client
+        # is not logged in, it refuses attachment and API raises exception.
+        # When client logs in, it does notsend any event, so I had to add gtk
+        # timeout function
+        try:
+            self.client.Attach()
+        except Skype4Py.skype.SkypeAPIError:
+            gtk.timeout_add(5000, self.attach_client)
         self.indicators = Indicators(self)
         
-        # Handle messages that were received before script launch
-        self.handle_unread_messages()
-
     def get_client(self):
         """ Reveice Skype4Py.Skype instance
             ** Maybe launch Skype if not launched?
@@ -103,7 +110,7 @@ class SkypeHandler:
         skype = Skype4Py.Skype(Events=self, Api=SkypeAPI({}))
 
         if not skype.Client.IsRunning:
-            raise Exception("Skype is not running")
+            skype.Client.Start()
 
         return skype
 
@@ -136,17 +143,30 @@ class SkypeHandler:
         else:
             label = msg.FromDisplayName
             handle = msg.FromHandle
-        if status == 'RECEIVED':
+        if status == Skype4Py.skype.cmsReceived:
             self.indicators.add_indicator(label, handle, msg.Timestamp, msg.Id)
             self.indicators.notify(label, msg.Body)
-        elif status == "READ":
+        elif status == Skype4Py.skype.cmsRead:
             self.indicators.remove_indicator(handle, msg.Id)
 
     def handle_unread_messages(self):
         for msg in self.client.MissedMessages:
             self.MessageStatus(msg, msg.Status)
 
+    # gtk timeout callback
+    def attach_client(self):
+        """ tries to attach API to client """
+        self.client.Attach()
+        return self.client.AttachmentStatus != Skype4Py.skype.apiAttachSuccess
 
+
+    def AttachmentStatus(self, status):
+        #Quit when Skype quits
+        if status == Skype4Py.skype.apiAttachNotAvailable:
+            gtk.main_quit()
+        #process unread messages after attachment
+        elif status == Skype4Py.skype.apiAttachSuccess:
+            self.handle_unread_messages()
 
 if __name__ == '__main__':
     SkypeHandler()

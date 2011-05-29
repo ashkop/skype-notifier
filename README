@@ -1,0 +1,17 @@
+skype-notifier - script that integrates Skype in Ubuntu Messaging menu
+
+Requires: python, python-skype, python-notify, python-gtk
+
+It could be used in two ways:
+ - just launch script from terminal. It will launch Skype if it is not running 
+   yet, and will display Skype and new messages in Ubuntu Messaging Menu. When 
+   you will exit Skype, items in Messaging Menu will disappear
+   
+ - Use script as a wrapper for Skype application.
+   Edit /usr/share/applications/skype.desktop file, point Exec parameter to
+   skype-notifier script (don't forget to do chmod uo+x).
+   
+   If you'd like to be able to launch Skype from Messaging Menu add
+   /usr/share/indicators/messaging/applications/skype file with one line in it:
+   
+   /usr/share/applications/skype.desktop

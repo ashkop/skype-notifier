@@ -15,3 +15,16 @@ It could be used in two ways:
    /usr/share/indicators/messaging/applications/skype file with one line in it:
    
    /usr/share/applications/skype.desktop
+
+Optionaly you can disabel Skype text notifications in Skype settings and remove
+Skype icon from top toolbar. To remove icon you do:
+1) install dconf-tools
+2) run dconf-editor
+3) navigate to: Desktop > Unity > Panel and highlight the panel option. 
+4) In the pane on the right you'll see a string of items which are allowed to 
+   display in the Notification Area as if it were a System Tray, Skype is one of 
+   them, so carefully remove it making sure you don't mess up the formatting of 
+   'item','etc','etc'
+
+On the first launch of the script you will be prompted to allow Skype4Py
+connection to Skype. You should click 'Yes' or script won;t work.
